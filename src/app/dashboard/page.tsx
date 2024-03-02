@@ -58,14 +58,6 @@ export default function Dashboard() {
     }, [router]);
   return (
     <>
-      {/*
-        This example requires updating your template:
-
-        ```
-        <html class="h-full">
-        <body class="h-full">
-        ```
-      */}
       <div className="min-h-full bg-white">
         <Disclosure as="nav" className="border-b border-gray-200 bg-white">
           {({ open }) => (
