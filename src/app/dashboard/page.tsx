@@ -1,28 +1,61 @@
-import { Fragment } from 'react'
-import { Disclosure, Menu, Transition } from '@headlessui/react'
-import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline'
+"use client";
+import { Fragment, useEffect, useState } from "react";
+import { Disclosure, Menu, Transition } from "@headlessui/react";
+import { Bars3Icon, Cog6ToothIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { useRouter } from "next/navigation";
 
 const user = {
-  name: 'Tom Cook',
-  email: 'tom@example.com'
-}
+  name: "Tom Cook",
+  email: "tom@example.com",
+};
 const navigation = [
-  { name: 'Dashboard', href: '#', current: true },
-  { name: 'Team', href: '#', current: false },
-  { name: 'Projects', href: '#', current: false },
-  { name: 'Calendar', href: '#', current: false },
-]
+  { name: "Dashboard", href: "#", current: true },
+  { name: "Create Campaign", href: "#", current: false }
+];
 const userNavigation = [
-  { name: 'Your Profile', href: '#' },
-  { name: 'Settings', href: '#' },
-  { name: 'Sign out', href: '#' },
-]
+  { name: "Your Profile", href: "#" },
+  { name: "Settings", href: "#" },
+  { name: "Sign out", href: "#" },
+];
 
 function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(' ')
+  return classes.filter(Boolean).join(" ");
 }
 
-export default function Example() {
+export default function Dashboard() {
+    const [user, setUser] = useState({ name: '', email: '' });
+    const router = useRouter();
+  
+    useEffect(() => {
+      const fetchUserData = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          console.error('No token found, redirecting to login...');
+          router.push('/login'); // Redirect to login if no token
+          return;
+        }
+  
+        try {
+          const response = await fetch('/api/getUser', {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+  
+          if (!response.ok) {
+            throw new Error('Failed to fetch user data');
+          }
+  
+          const data = await response.json();
+          setUser({ name: data.name, email: data.email });
+        } catch (error: any) {
+            console.error('Error fetching user data:', error.message);
+        }
+      };
+  
+      fetchUserData();
+    }, [router]);
   return (
     <>
       {/*
@@ -33,7 +66,7 @@ export default function Example() {
         <body class="h-full">
         ```
       */}
-      <div className="min-h-full">
+      <div className="min-h-full bg-white">
         <Disclosure as="nav" className="border-b border-gray-200 bg-white">
           {({ open }) => (
             <>
@@ -59,11 +92,11 @@ export default function Example() {
                           href={item.href}
                           className={classNames(
                             item.current
-                              ? 'border-indigo-500 text-gray-900'
-                              : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
-                            'inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium'
+                              ? "border-indigo-500 text-gray-900"
+                              : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700",
+                            "inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium"
                           )}
-                          aria-current={item.current ? 'page' : undefined}
+                          aria-current={item.current ? "page" : undefined}
                         >
                           {item.name}
                         </a>
@@ -77,7 +110,7 @@ export default function Example() {
                     >
                       <span className="absolute -inset-1.5" />
                       <span className="sr-only">View notifications</span>
-                      <BellIcon className="h-6 w-6" aria-hidden="true" />
+                      <Cog6ToothIcon className="h-6 w-6" aria-hidden="true" />
                     </button>
 
                     {/* Profile dropdown */}
@@ -104,8 +137,8 @@ export default function Example() {
                                 <a
                                   href={item.href}
                                   className={classNames(
-                                    active ? 'bg-gray-100' : '',
-                                    'block px-4 py-2 text-sm text-gray-700'
+                                    active ? "bg-gray-100" : "",
+                                    "block px-4 py-2 text-sm text-gray-700"
                                   )}
                                 >
                                   {item.name}
@@ -123,9 +156,15 @@ export default function Example() {
                       <span className="absolute -inset-0.5" />
                       <span className="sr-only">Open main menu</span>
                       {open ? (
-                        <XMarkIcon className="block h-6 w-6" aria-hidden="true" />
+                        <XMarkIcon
+                          className="block h-6 w-6"
+                          aria-hidden="true"
+                        />
                       ) : (
-                        <Bars3Icon className="block h-6 w-6" aria-hidden="true" />
+                        <Bars3Icon
+                          className="block h-6 w-6"
+                          aria-hidden="true"
+                        />
                       )}
                     </Disclosure.Button>
                   </div>
@@ -141,11 +180,11 @@ export default function Example() {
                       href={item.href}
                       className={classNames(
                         item.current
-                          ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
-                          : 'border-transparent text-gray-600 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-800',
-                        'block border-l-4 py-2 pl-3 pr-4 text-base font-medium'
+                          ? "border-indigo-500 bg-indigo-50 text-indigo-700"
+                          : "border-transparent text-gray-600 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-800",
+                        "block border-l-4 py-2 pl-3 pr-4 text-base font-medium"
                       )}
-                      aria-current={item.current ? 'page' : undefined}
+                      aria-current={item.current ? "page" : undefined}
                     >
                       {item.name}
                     </Disclosure.Button>
@@ -153,12 +192,13 @@ export default function Example() {
                 </div>
                 <div className="border-t border-gray-200 pb-3 pt-4">
                   <div className="flex items-center px-4">
-                    <div className="flex-shrink-0">
-                      <img className="h-10 w-10 rounded-full" src={user.imageUrl} alt="" />
-                    </div>
                     <div className="ml-3">
-                      <div className="text-base font-medium text-gray-800">{user.name}</div>
-                      <div className="text-sm font-medium text-gray-500">{user.email}</div>
+                      <div className="text-base font-medium text-gray-800">
+                        {user.name}
+                      </div>
+                      <div className="text-sm font-medium text-gray-500">
+                        {user.email}
+                      </div>
                     </div>
                     <button
                       type="button"
@@ -166,7 +206,7 @@ export default function Example() {
                     >
                       <span className="absolute -inset-1.5" />
                       <span className="sr-only">View notifications</span>
-                      <BellIcon className="h-6 w-6" aria-hidden="true" />
+                      <Cog6ToothIcon className="h-6 w-6" aria-hidden="true" />
                     </button>
                   </div>
                   <div className="mt-3 space-y-1">
@@ -190,14 +230,22 @@ export default function Example() {
         <div className="py-10">
           <header>
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-              <h1 className="text-3xl font-bold leading-tight tracking-tight text-gray-900">Dashboard</h1>
+              <h1 className="text-3xl font-bold leading-tight tracking-tight text-gray-900">
+                Dashboard
+              </h1>
             </div>
           </header>
           <main>
-            <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">{/* Your content */}</div>
+            <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
+              <div>
+                <h2 className="text-xl font-bold">User Information</h2>
+                <p>Name: {user.name}</p>
+                <p>Email: {user.email}</p>
+              </div>
+            </div>
           </main>
         </div>
       </div>
     </>
-  )
+  );
 }
