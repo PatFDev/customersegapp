@@ -3,14 +3,15 @@ import { Fragment, useEffect, useState } from "react";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { Bars3Icon, Cog6ToothIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/navigation";
-
+import { ChartComponent } from "../home/components/ChartComponent"; // Adjust the path as necessary
 const user = {
   name: "Tom Cook",
   email: "tom@example.com",
 };
 const navigation = [
   { name: "Dashboard", href: "#", current: true },
-  { name: "Create Campaign", href: "#", current: false }
+  {name: "Upload", href: "/upload", current: false},
+  { name: "Create Campaign", href: "/createcampaign", current: false }
 ];
 const userNavigation = [
   { name: "Your Profile", href: "#" },
@@ -24,7 +25,52 @@ function classNames(...classes: string[]) {
 
 export default function Dashboard() {
     const [user, setUser] = useState({ name: '', email: '' });
+    const [data, setData] = useState([]);
+    const [data2, setData2] = useState([]);
+2
     const router = useRouter();
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const response = await fetch('/api/data'); // Adjust this to your API endpoint
+            const csvData = await response.json();
+            // Process your CSV data into the format expected by Chart.js
+            const processedData = {
+                labels: csvData.map(item => item.Category),
+                datasets: [{
+                    label: 'Purchase Amount (USD)',
+                    data: csvData.map(item => item['Purchase Amount (USD)']),
+                    backgroundColor: 'rgba(255, 99, 132, 0.5)', // Increased opacity for shading
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1,
+                }],
+            };            
+            setData(processedData);
+        };
+
+        fetchData();
+    }, []);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const response = await fetch('/api/data'); // Adjust this to your API endpoint
+            const csvData = await response.json();
+            // Process your CSV data into the format expected by Chart.js
+            const processedData2 = {
+                labels: csvData.map(item => item['Payment Method']),
+                datasets: [{
+                    label: 'Purchase Amount (USD)',
+                    data: csvData.map(item => item['Purchase Amount (USD)']),
+                    backgroundColor: 'rgba(255, 99, 132, 0.5)', // Increased opacity for shading
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1,
+                }],
+            };            
+            setData2(processedData2);
+        };
+
+        fetchData();
+    }, []);
   
     useEffect(() => {
       const fetchUserData = async () => {
@@ -230,9 +276,10 @@ export default function Dashboard() {
           <main>
             <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
               <div>
-                <h2 className="text-xl font-bold">User Information</h2>
-                <p>Name: {user.name}</p>
-                <p>Email: {user.email}</p>
+                <h2 className="text-xl font-bold">Charts</h2>
+                <ChartComponent chartData={data} />
+                <ChartComponent chartData={data2} />
+
               </div>
             </div>
           </main>

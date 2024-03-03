@@ -1,12 +1,14 @@
 "use client";
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 export default function CreatePassword() {
   const [searchParams] = useSearchParams();
   const [userDetails, setUserDetails] = useState({ name: '', email: '' });
   const [password, setPassword] = useState('');
   const [sessionId, setSessionId] = useState('');
+
+  const router = useRouter()
 
   useEffect(() => {
     // Assuming searchParams is a URLSearchParams object or similar
@@ -58,7 +60,8 @@ export default function CreatePassword() {
     const data = await response.json();
     if (data.success) {
       console.log('Password set successfully');
-      // Optionally redirect the user or update the UI state here
+      router.push('/signin');
+      
     } else {
       console.error('Failed to set password');
     }

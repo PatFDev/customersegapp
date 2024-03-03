@@ -1,69 +1,56 @@
-"use client";
-import { Fragment, SetStateAction, useState } from "react";
-import { Disclosure, Transition } from "@headlessui/react";
-import { Bars3Icon, CloudIcon, Cog6ToothIcon, DocumentTextIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { useRouter } from "next/navigation";
+"use client"
+import React, { useState } from 'react';
+import { Disclosure } from '@headlessui/react';
+import { Bars3Icon, CloudIcon, Cog6ToothIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 const navigation = [
-  { name: "Dashboard", href: "/dashboard", current: false },
-  { name: "Upload Data", href: "#", current: true },
-  { name: "Create Campaign", href: "/createcampaign", current: false },
-]
+    { name: "Dashboard", href: "/dashboard", current: false },
+    {name: "Upload", href: "/upload", current: false},
+    { name: "Create Campaign", href: "/createcampaign", current: true }
+  ];
+  const userNavigation = [
+    { name: "Your Profile", href: "#" },
+    { name: "Settings", href: "#" },
+    { name: "Sign out", href: "#" },
+  ];
+  
+  function classNames(...classes: string[]) {
+    return classes.filter(Boolean).join(" ");
+  }
 
-function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(" ");
-}
+export default function CreateCampaign() {
+  const [parameter, setParameter] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [chatResponse, setChatResponse] = useState('');
 
-export default function UploadModel() {
-  const [file, setFile] = useState(null);
-  const [fileName, setFileName] = useState(""); // State to keep track of the file name
-
-  const handleFileChange = (event: { target: { files: any[]; }; }) => {
-    const selectedFile = event.target.files[0];
-    if (selectedFile) {
-      setFile(selectedFile);
-      setFileName(selectedFile.name);
-    } else {
-      setFile(null);
-      setFileName("");
-    }
+  const handleParameterChange = (event) => {
+    setParameter(event.target.value);
   };
-  const handleSubmit = async (event: { preventDefault: () => void; }) => {
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    if (file) {
-      const formData = new FormData();
-      formData.append("csvfile", file);
-  
-      // Fetch the token from localStorage or your state management solution.
-      const token = localStorage.getItem('token'); // Assuming the token is stored here after login.
-      if (!token) {
-        console.error("No token found, please log in.");
-        return;
-      }
-  
-      try {
-        const response = await fetch("http://127.0.0.1:5000/upload", {
-          method: "POST",
-          body: formData,
-          headers: {
-            'Authorization': 'Bearer ' + token, // Include the token in the request headers.
-          },
-        });
-  
-        if (response.ok) {
-          const result = await response.json();
-          console.log("Upload success:", result);
-          // Handle success response.
-        } else {
-          console.error("Upload failed");
-          // Handle error response.
-        }
-      } catch (error) {
-        console.error("Error uploading file:", error);
-        // Handle exceptions.
-      }
+    setIsLoading(true);
+
+    // Replace 'API_ENDPOINT' with the actual endpoint where your API is hosted
+    const response = await fetch('/api/generatetext', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ parameter }),
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      setChatResponse(data.chatResponse);
+    } else {
+      console.error(data.error?.message || 'Failed to fetch the chat response');
+      setChatResponse('Failed to fetch the chat response');
     }
+    setIsLoading(false);
   };
+
+
   return (
     <>
       <div className="min-h-full bg-gray-100">
@@ -172,47 +159,57 @@ export default function UploadModel() {
             </>
           )}
         </Disclosure>
-        <header className="bg-white shadow">
-          <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-            <h1 className="text-3xl font-bold text-gray-900">Upload Data</h1>
-          </div>
-        </header>
+
         <main>
-          <div className="max-w-3xl mx-auto py-6 sm:px-6 lg:px-8">
-            <div className="px-4 py-6 sm:px-0">
-              <div className="border-4 border-dashed border-gray-200 rounded-lg h-auto">
-              <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <h3 className="text-lg leading-6 font-medium text-gray-900">Select a CSV file to upload</h3>
-              <div className="mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-                <div className="space-y-1 text-center">
-                  <CloudIcon className="mx-auto h-12 w-12 text-gray-400" />
-                  <div className="flex text-sm text-gray-600">
-                    <label htmlFor="file-upload" className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500">
-                      <span>Upload a file</span>
-                      <input id="file-upload" name="file-upload" type="file" className="sr-only" onChange={handleFileChange} />
+        <div className="py-10">
+          <header>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <h1 className="text-3xl font-bold leading-tight text-gray-900">Create Campaign</h1>
+            </div>
+          </header>
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 md:px-8">
+            <div className="bg-white shadow sm:rounded-lg">
+              <div className="px-4 py-5 sm:p-6">
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div>
+                    <label htmlFor="parameter" className="block text-sm font-medium text-gray-700">
+                      Campaign Parameter
                     </label>
+                    <input
+                      type="text"
+                      name="parameter"
+                      id="parameter"
+                      autoComplete="off"
+                      className="text-black mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                      placeholder="e.g., Male"
+                      value={parameter}
+                      onChange={handleParameterChange}
+                      required
+                    />
                   </div>
-                  {fileName && (
-                    <div className="text-sm text-gray-900 font-medium mt-2">
-                      <DocumentTextIcon className="inline-block h-6 w-6 text-gray-400" aria-hidden="true" />
-                      {fileName}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-            <div>
-              <button type="submit" className="w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                Upload
-              </button>
-            </div>
-          </form>
+
+                  <div className="flex justify-end">
+                    <button
+                      type="submit"
+                      className={`inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${isLoading ? 'opacity-75' : ''}`}
+                      disabled={isLoading}
+                    >
+                      {isLoading ? 'Processing...' : 'Submit'}
+                    </button>
+                  </div>
+                </form>
+                {chatResponse && (
+                  <div className="mt-6 p-4 bg-white shadow rounded-lg">
+                    <h3 className="text-black text-lg font-medium">Generated Text:</h3>
+                    <p className="mt-2 text-gray-700">{chatResponse}</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
-        </main>
-      </div>
+        </div>
+      </main>
+    </div> 
     </>
   );
 }
